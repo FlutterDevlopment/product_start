@@ -1,79 +1,94 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:product_saling_test/blueprints/product_list_brain.dart';
 import 'package:product_saling_test/components/categories.dart';
-import 'package:product_saling_test/components/product_page_banner.dart';
 import 'package:product_saling_test/components/products_grid.dart';
 import 'package:product_saling_test/constants.dart';
+import 'package:show_up_animation/show_up_animation.dart';
 
-class ProductList extends StatefulWidget {
+class AllProductsPage extends StatefulWidget {
   @override
-  _ProductListState createState() => _ProductListState();
+  _AllProductsPageState createState() => _AllProductsPageState();
 }
 
-class _ProductListState extends State<ProductList> {
-  final List categories = [
-    "Electronics",
-    "Baby",
-    "Sports",
-    "Watch",
-    "Jewels",
-    "City"
-  ];
+class _AllProductsPageState extends State<AllProductsPage> {
+  ProductListBrain _productListBrain = ProductListBrain();
+  List categoriesList = [];
+  String categoryName = "Industrial";
+  List categoryItems = [];
+
   // ignore: non_constant_identifier_names
   var selected_index = 0;
 
   @override
+  void initState() {
+    getCategories();
+    getIndividualCategoryItems();
+    super.initState();
+  }
+
+  // Gives the list of unique category
+  void getCategories() async {
+    var categoryList = await _productListBrain.getCategoryList();
+    setState(() {
+      categoriesList = categoryList;
+    });
+  }
+
+  void getIndividualCategoryItems() async {
+    var items = await _productListBrain.getCategoryItems(categoryName);
+    setState(() {
+      categoryItems = items;
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     var size = MediaQuery.of(context).size;
-    print(size.height);
-    print(size.width);
+    final PageController controller = PageController(initialPage: 0);
+
     return SafeArea(
       child: Scaffold(
-        backgroundColor: Color(0xFFFBF1EE),
-        appBar: AppBar(
-          centerTitle: true,
-          backgroundColor: Color(0xFFFBF1EE),
-          elevation: 0,
-          actions: [
-            Padding(
-              padding: const EdgeInsets.only(right: 10),
-              child: IconButton(
-                  icon: Icon(
-                    Icons.search,
-                    color: kTextColor,
-                  ),
-                  onPressed: () {}),
-            ),
-            Padding(
-              padding: const EdgeInsets.only(right: 10),
-              child: IconButton(
-                  icon: Icon(
-                    Icons.shopping_bag_rounded,
-                    color: kTextColor,
-                  ),
-                  onPressed: () {}),
-            ),
-          ],
-          title: Text(
-            "Products",
-            style: kTextStyle,
-          ),
-        ),
+        backgroundColor: kBgLightColor,
+        // appBar: AllProductsAppBar(),
         body: SingleChildScrollView(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              ProductPageBanner(size: size),
               Padding(
-                padding: const EdgeInsets.symmetric(
-                    horizontal: kHorizontalPadding, vertical: kVerticalPadding),
-                child: Text(
-                  "Categories",
-                  style: kTextStyle.copyWith(fontSize: 24),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 30, vertical: 20),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      "Products",
+                      style: kTitleText,
+                    ),
+                    Row(
+                      children: [
+                        IconButton(
+                            icon: Icon(
+                              Icons.search,
+                              size: 30,
+                            ),
+                            onPressed: () {}),
+                        SizedBox(
+                          width: 5,
+                        ),
+                        IconButton(
+                            icon: Icon(
+                              Icons.shopping_cart_rounded,
+                              size: 30,
+                            ),
+                            onPressed: () {}),
+                      ],
+                    ),
+                  ],
                 ),
               ),
-              categoryContainer(size),
-              ProductGrid(size: size),
+              categoryContainer(size, categoriesList),
+              ProductGrid(size: size, categoryItems: categoryItems)
             ],
           ),
         ),
@@ -81,7 +96,7 @@ class _ProductListState extends State<ProductList> {
     );
   }
 
-  Padding categoryContainer(Size size) {
+  Padding categoryContainer(Size size, List categories) {
     return Padding(
       padding: const EdgeInsets.symmetric(
           horizontal: kHorizontalPadding, vertical: kVerticalPadding),
@@ -97,6 +112,9 @@ class _ProductListState extends State<ProductList> {
                 onTap: () {
                   setState(() {
                     selected_index = index;
+                    categoryName = categoriesList[selected_index];
+                    getIndividualCategoryItems();
+                    // individualCategory();
                   });
                 },
                 child: Categories(

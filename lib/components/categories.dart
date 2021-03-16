@@ -21,11 +21,26 @@ class Categories extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.only(top: 5, right: 26),
       child: Container(
-        child: Text(
-          "${categories[index]}",
-          style: kTextStyle.copyWith(
-              fontSize: 17.3,
-              color: selected_index == index ? Color(0xFFff1616) : Colors.grey),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              "${categories[index]}",
+              style: kTextStyle.copyWith(
+                  fontSize: 20,
+                  color:
+                      selected_index == index ? Colors.black87 : Colors.grey),
+            ),
+            SizedBox(
+              height: 5,
+            ),
+            Container(
+              color:
+                  selected_index == index ? Colors.black87 : Colors.transparent,
+              height: 3,
+              width: 45,
+            )
+          ],
         ),
       ),
     );
